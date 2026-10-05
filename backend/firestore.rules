@@ -1,0 +1,614 @@
+rules_version = '2';
+
+// ===============================================================
+// Assumed Data Model
+// ===============================================================
+//
+// This security rules file assumes the following data structures:
+//
+// Collection: users
+// Document ID: userId (matches user's auth.uid)
+// Fields:
+//   - userId: string (required, immutable) - Unique user identifier
+//   - name: string (required, 2-100 chars) - Full user name
+//   - email: string (required, valid email, max 150 chars) - Contact email address
+//   - phone: string (required, 7-25 chars) - Mobile phone number
+//   - role: string (required, enum: 'seeker' | 'employer' | 'admin', role changes restricted to admin)
+//   - location: string (required, 2-150 chars) - Locality / City
+//   - profilePhoto: string (required, valid URL, max 500 chars) - Avatar URL
+//   - createdAt: timestamp | ISO string (required, immutable) - Account creation timestamp
+//   - isVerified: bool (optional, immutable by regular user, admin managed)
+//
+// Collection: jobSeekerProfiles
+// Document ID: userId (matches seeker's auth.uid)
+// Fields:
+//   - userId: string (required, immutable) - Matches user ID
+//   - skills: list of strings (required, max 30 items) - Candidate skills
+//   - education: string (required, 1-200 chars) - Education qualification
+//   - experience: string (required, 1-200 chars) - Work experience summary
+//   - preferredJobType: list of strings (required, max 10 items) - Job preferences
+//   - expectedSalary: number (required, >= 0, max 10,000,000) - Expected periodic pay in INR
+//   - availability: string (required, 1-100 chars) - Availability schedule
+//   - languages: list of strings (required, max 20 items) - Languages known
+//   - about: string (optional, max 2000 chars) - Extended profile bio
+//   - salaryType: string (optional, max 50 chars) - e.g. 'per month'
+//   - contactPreference: string (optional, max 50 chars) - Contact channel preference
+//   - rating: number (optional, 0-5, immutable by owner) - User rating
+//   - reviewsCount: number (optional, >= 0, immutable by owner) - Number of reviews
+//
+// Collection: employerProfiles
+// Document ID: userId (matches employer's auth.uid)
+// Fields:
+//   - userId: string (required, immutable) - Matches user ID
+//   - businessName: string (required, 2-150 chars) - Business or employer name
+//   - description: string (required, 5-3000 chars) - Company / household description
+//   - location: string (required, 2-150 chars) - Physical operating locality
+//   - verificationStatus: string (required, enum: 'Verified Employer' | 'Pending Verification' | 'Unverified', only admin can update)
+//   - rating: number (required, 0-5, immutable by owner) - Average rating
+//   - reviewsCount: number (required, >= 0, immutable by owner) - Reviews count
+//   - about: string (optional, max 3000 chars) - Extended business description
+//   - previouslyPosted: number (optional, >= 0) - Historical postings count
+//
+// Collection: jobs
+// Document ID: jobId
+// Fields:
+//   - jobId: string (required, immutable) - Unique job identifier
+//   - employerId: string (required, immutable, matches creator's auth.uid)
+//   - title: string (required, 3-150 chars) - Listing title
+//   - category: string (required, enum: 'education' | 'sales' | 'retail' | 'domestic' | 'delivery' | 'office' | 'technical' | 'hospitality' | 'events' | 'driving' | 'student' | 'other')
+//   - description: string (required, 10-5000 chars) - Detailed requirements
+//   - skills: list of strings (required, max 30 items) - Required skills
+//   - location: string (required, 2-150 chars) - Job location / landmark
+//   - salary: number (required, >= 0, max 100,000,000) - Wage amount
+//   - salaryType: string (required, enum: 'per month' | 'per day' | 'per hour' | 'fixed')
+//   - jobType: string (required, enum: 'Part-Time' | 'Full-Time' | 'Temporary' | 'Weekend' | 'Student-friendly' | 'Remote')
+//   - workingHours: string (required, 1-100 chars) - Shift / schedule timings
+//   - experience: string (required, 1-100 chars) - Required background
+//   - openings: number (required, >= 1, max 1000) - Available positions
+//   - deadline: string (required, 4-50 chars) - Expiration / closing date
+//   - createdAt: timestamp | ISO string (required, immutable) - Posting creation time
+//   - status: string (required, enum: 'active' | 'closed' | 'paused')
+//   - employerName: string (optional, max 150 chars)
+//   - employerVerified: bool (optional)
+//   - employerRating: number (optional, 0-5)
+//   - responsibilities: list of strings (optional, max 30 items)
+//   - salaryDisplay: string (optional, max 100 chars)
+//   - featured: bool (optional)
+//
+// Collection: applications
+// Document ID: applicationId
+// Fields:
+//   - applicationId: string (required, immutable) - Application record ID
+//   - jobId: string (required, immutable) - Associated job listing ID
+//   - applicantId: string (required, immutable, matches applicant's auth.uid)
+//   - employerId: string (required, immutable) - Target employer UID
+//   - resume: string (required, 1-1000 chars) - Resume link or credential summary
+//   - message: string (required, 1-2000 chars) - Introductory message
+//   - status: string (required, enum: 'Submitted' | 'Viewed' | 'Shortlisted' | 'Rejected' | 'Hired', only employer/admin can update)
+//   - appliedAt: timestamp | ISO string (required, immutable) - Submission timestamp
+//   - applicantName: string (optional, max 100 chars)
+//   - applicantPhoto: string (optional, max 500 chars)
+//   - jobTitle: string (optional, max 150 chars)
+//   - skills: list of strings (optional, max 30 items)
+//   - expectedSalary: number (optional, >= 0)
+//   - availability: string (optional, max 100 chars)
+//   - experience: string (optional, max 100 chars)
+//   - location: string (optional, max 150 chars)
+//   - employerName: string (optional, max 150 chars)
+//   - resumeNote: string (optional, max 1000 chars)
+//
+// Collection: messages
+// Document ID: messageId
+// Fields:
+//   - messageId: string (required, immutable) - Chat message ID
+//   - senderId: string (required, immutable, matches sender's auth.uid)
+//   - receiverId: string (required, immutable, cannot match senderId)
+//   - jobId: string (required, immutable, 1-128 chars) - Linked job context
+//   - message: string (required, 1-3000 chars) - Message body text
+//   - timestamp: timestamp | ISO string (required, immutable) - Timestamp
+//   - readStatus: bool (required, receiver marks read)
+//   - jobTitle: string (optional, max 150 chars)
+//   - senderName: string (optional, max 100 chars)
+//
+// Collection: reviews
+// Document ID: reviewId
+// Fields:
+//   - reviewId: string (required, immutable) - Review ID
+//   - reviewerId: string (required, immutable, matches reviewer's auth.uid)
+//   - reviewedUserId: string (required, immutable, cannot match reviewerId)
+//   - rating: number (required, 1 to 5) - Score
+//   - review: string (required, 2-2000 chars) - Feedback comments
+//   - createdAt: timestamp | ISO string (required, immutable) - Timestamp
+//
+// Collection: reports
+// Document ID: reportId
+// Fields:
+//   - reportId: string (required, immutable) - Ticket ID
+//   - reporterId: string (required, immutable, matches reporter's auth.uid)
+//   - reason: string (required, 2-300 chars) - Abuse reason
+//   - status: string (required, enum: 'pending_review' | 'investigating' | 'resolved' | 'dismissed' | 'pending' | 'Submitted', only admin can update)
+//   - createdAt: timestamp | ISO string (required, immutable) - Creation time
+//   - reportedUserId: string (optional, max 128 chars)
+//   - jobId: string (optional, max 128 chars)
+//   - type: string (optional, max 50 chars) - 'job' | 'user'
+//   - targetId: string (optional, max 128 chars)
+//   - details: string (optional, max 3000 chars)
+//   - actionTaken: string (optional, max 1000 chars)
+//
+// ===============================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Helper Functions Library
+    // ===============================================================
+
+    // Check if user is signed in
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Check if the authenticated user owns the resource
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Check if user is an authorized platform administrator
+    // Authority source: custom auth claim, or verified bootstrap admin email, or seed admin uid
+    function isAdmin() {
+      return isAuthenticated() && (
+        request.auth.token.get('admin', false) == true ||
+        request.auth.token.get('role', '') == 'admin' ||
+        (request.auth.token.get('email_verified', false) == true && (
+          request.auth.token.email == 'admin@hirenear.local' ||
+          request.auth.token.email == 'admin@hirenear.com' ||
+          request.auth.token.email == 'admin@example.com'
+        )) ||
+        request.auth.uid == 'admin-1'
+      );
+    }
+
+    // Check if user has an employer role
+    function isEmployer() {
+      return isAuthenticated() && (
+        request.auth.token.get('role', '') == 'employer' ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', '') == 'employer') ||
+        isAdmin()
+      );
+    }
+
+    // Validate required fields exist in payload
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    // Enforce strict schema with no extraneous fields
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    // Ensure specified fields are never modified on update
+    function areImmutableFieldsUnchanged(fields) {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(fields);
+    }
+
+    // Validate string presence, type, and size bounds (prevents DoS / resource exhaustion)
+    function validString(val, minLen, maxLen) {
+      return val is string && val.size() >= minLen && val.size() <= maxLen;
+    }
+
+    // Validate optional string
+    function isValidOptionalString(data, field, minLen, maxLen) {
+      return !(field in data) || (data[field] is string && data[field].size() >= minLen && data[field].size() <= maxLen);
+    }
+
+    // Validate optional number
+    function isValidOptionalNumber(data, field, minVal, maxVal) {
+      return !(field in data) || (data[field] is number && data[field] >= minVal && data[field] <= maxVal);
+    }
+
+    // Validate optional boolean
+    function isValidOptionalBool(data, field) {
+      return !(field in data) || data[field] is bool;
+    }
+
+    // Validate optional list
+    function isValidOptionalList(data, field, maxItems) {
+      return !(field in data) || (data[field] is list && data[field].size() <= maxItems);
+    }
+
+    // Validate URL format (http, https, or standard image data-uri)
+    function isValidUrl(url) {
+      return url is string &&
+        url.size() <= 500 &&
+        (url.matches("^https?://.*") || url.matches("^data:image/.*"));
+    }
+
+    // Validate email format
+    function isValidEmail(email) {
+      return email is string &&
+        email.size() <= 150 &&
+        email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    // Validate date format (accepts Firestore timestamp or ISO 8601 string)
+    function isValidDate(val) {
+      return (val is timestamp) ||
+        (val is string && val.size() <= 50 && val.matches("^\\d{4}-\\d{2}-\\d{2}.*"));
+    }
+
+    // ===============================================================
+    // Domain Validator Functions (Called on BOTH create and update)
+    // ===============================================================
+
+    // Validator for /users/{userId}
+    function isValidUser(data) {
+      return hasOnlyAllowedFields(['userId', 'name', 'email', 'phone', 'role', 'location', 'profilePhoto', 'createdAt', 'isVerified']) &&
+        hasRequiredFields(['userId', 'name', 'email', 'phone', 'role', 'location', 'profilePhoto', 'createdAt']) &&
+        validString(data.userId, 1, 128) &&
+        validString(data.name, 2, 100) &&
+        isValidEmail(data.email) &&
+        validString(data.phone, 7, 25) &&
+        data.role in ['seeker', 'employer', 'admin'] &&
+        validString(data.location, 2, 150) &&
+        isValidUrl(data.profilePhoto) &&
+        isValidDate(data.createdAt) &&
+        isValidOptionalBool(data, 'isVerified');
+    }
+
+    // Validator for /jobSeekerProfiles/{userId}
+    function isValidJobSeekerProfile(data) {
+      return hasOnlyAllowedFields(['userId', 'skills', 'education', 'experience', 'preferredJobType', 'expectedSalary', 'availability', 'languages', 'about', 'salaryType', 'contactPreference', 'rating', 'reviewsCount']) &&
+        hasRequiredFields(['userId', 'skills', 'education', 'experience', 'preferredJobType', 'expectedSalary', 'availability', 'languages']) &&
+        validString(data.userId, 1, 128) &&
+        data.skills is list && data.skills.size() <= 30 &&
+        validString(data.education, 1, 200) &&
+        validString(data.experience, 1, 200) &&
+        data.preferredJobType is list && data.preferredJobType.size() >= 1 && data.preferredJobType.size() <= 10 &&
+        data.expectedSalary is number && data.expectedSalary >= 0 && data.expectedSalary <= 10000000 &&
+        validString(data.availability, 1, 100) &&
+        data.languages is list && data.languages.size() >= 1 && data.languages.size() <= 20 &&
+        isValidOptionalString(data, 'about', 0, 2000) &&
+        isValidOptionalString(data, 'salaryType', 1, 50) &&
+        isValidOptionalString(data, 'contactPreference', 1, 50) &&
+        isValidOptionalNumber(data, 'rating', 0, 5) &&
+        isValidOptionalNumber(data, 'reviewsCount', 0, 1000000);
+    }
+
+    // Validator for /employerProfiles/{userId}
+    function isValidEmployerProfile(data) {
+      return hasOnlyAllowedFields(['userId', 'businessName', 'description', 'location', 'verificationStatus', 'rating', 'reviewsCount', 'about', 'previouslyPosted']) &&
+        hasRequiredFields(['userId', 'businessName', 'description', 'location', 'verificationStatus', 'rating', 'reviewsCount']) &&
+        validString(data.userId, 1, 128) &&
+        validString(data.businessName, 2, 150) &&
+        validString(data.description, 5, 3000) &&
+        validString(data.location, 2, 150) &&
+        data.verificationStatus in ['Verified Employer', 'Pending Verification', 'Unverified'] &&
+        data.rating is number && data.rating >= 0 && data.rating <= 5 &&
+        data.reviewsCount is number && data.reviewsCount >= 0 &&
+        isValidOptionalString(data, 'about', 0, 3000) &&
+        isValidOptionalNumber(data, 'previouslyPosted', 0, 100000);
+    }
+
+    // Validator for /jobs/{jobId}
+    function isValidJob(data) {
+      return hasOnlyAllowedFields(['jobId', 'employerId', 'title', 'category', 'description', 'skills', 'location', 'salary', 'salaryType', 'jobType', 'workingHours', 'experience', 'openings', 'deadline', 'createdAt', 'status', 'employerName', 'employerVerified', 'employerRating', 'responsibilities', 'salaryDisplay', 'featured']) &&
+        hasRequiredFields(['jobId', 'employerId', 'title', 'category', 'description', 'skills', 'location', 'salary', 'salaryType', 'jobType', 'workingHours', 'experience', 'openings', 'deadline', 'createdAt', 'status']) &&
+        validString(data.jobId, 1, 128) &&
+        validString(data.employerId, 1, 128) &&
+        validString(data.title, 3, 150) &&
+        data.category in ['education', 'sales', 'retail', 'domestic', 'delivery', 'office', 'technical', 'hospitality', 'events', 'driving', 'student', 'other'] &&
+        validString(data.description, 10, 5000) &&
+        data.skills is list && data.skills.size() <= 30 &&
+        validString(data.location, 2, 150) &&
+        data.salary is number && data.salary >= 0 && data.salary <= 100000000 &&
+        data.salaryType in ['per month', 'per day', 'per hour', 'fixed'] &&
+        data.jobType in ['Part-Time', 'Full-Time', 'Temporary', 'Weekend', 'Student-friendly', 'Remote'] &&
+        validString(data.workingHours, 1, 100) &&
+        validString(data.experience, 1, 100) &&
+        data.openings is number && data.openings >= 1 && data.openings <= 1000 &&
+        validString(data.deadline, 4, 50) &&
+        isValidDate(data.createdAt) &&
+        data.status in ['active', 'closed', 'paused'] &&
+        isValidOptionalString(data, 'employerName', 1, 150) &&
+        isValidOptionalBool(data, 'employerVerified') &&
+        isValidOptionalNumber(data, 'employerRating', 0, 5) &&
+        isValidOptionalList(data, 'responsibilities', 30) &&
+        isValidOptionalString(data, 'salaryDisplay', 1, 100) &&
+        isValidOptionalBool(data, 'featured');
+    }
+
+    // Validator for /applications/{applicationId}
+    function isValidApplication(data) {
+      return hasOnlyAllowedFields(['applicationId', 'jobId', 'applicantId', 'employerId', 'resume', 'resumeNote', 'message', 'status', 'appliedAt', 'applicantName', 'applicantPhoto', 'jobTitle', 'skills', 'expectedSalary', 'availability', 'experience', 'location', 'employerName']) &&
+        hasRequiredFields(['applicationId', 'jobId', 'applicantId', 'employerId', 'resume', 'message', 'status', 'appliedAt']) &&
+        validString(data.applicationId, 1, 128) &&
+        validString(data.jobId, 1, 128) &&
+        validString(data.applicantId, 1, 128) &&
+        validString(data.employerId, 1, 128) &&
+        validString(data.resume, 1, 1000) &&
+        validString(data.message, 1, 2000) &&
+        data.status in ['Submitted', 'Viewed', 'Shortlisted', 'Rejected', 'Hired'] &&
+        isValidDate(data.appliedAt) &&
+        isValidOptionalString(data, 'resumeNote', 0, 1000) &&
+        isValidOptionalString(data, 'applicantName', 1, 100) &&
+        isValidOptionalString(data, 'applicantPhoto', 1, 500) &&
+        isValidOptionalString(data, 'jobTitle', 1, 150) &&
+        isValidOptionalList(data, 'skills', 30) &&
+        isValidOptionalNumber(data, 'expectedSalary', 0, 10000000) &&
+        isValidOptionalString(data, 'availability', 1, 100) &&
+        isValidOptionalString(data, 'experience', 1, 100) &&
+        isValidOptionalString(data, 'location', 1, 150) &&
+        isValidOptionalString(data, 'employerName', 1, 150);
+    }
+
+    // Validator for /messages/{messageId}
+    function isValidMessage(data) {
+      return hasOnlyAllowedFields(['messageId', 'senderId', 'receiverId', 'jobId', 'message', 'timestamp', 'readStatus', 'jobTitle', 'senderName']) &&
+        hasRequiredFields(['messageId', 'senderId', 'receiverId', 'jobId', 'message', 'timestamp', 'readStatus']) &&
+        validString(data.messageId, 1, 128) &&
+        validString(data.senderId, 1, 128) &&
+        validString(data.receiverId, 1, 128) &&
+        data.senderId != data.receiverId &&
+        validString(data.jobId, 1, 128) &&
+        validString(data.message, 1, 3000) &&
+        isValidDate(data.timestamp) &&
+        data.readStatus is bool &&
+        isValidOptionalString(data, 'jobTitle', 1, 150) &&
+        isValidOptionalString(data, 'senderName', 1, 100);
+    }
+
+    // Validator for /reviews/{reviewId}
+    function isValidReview(data) {
+      return hasOnlyAllowedFields(['reviewId', 'reviewerId', 'reviewedUserId', 'rating', 'review', 'createdAt']) &&
+        hasRequiredFields(['reviewId', 'reviewerId', 'reviewedUserId', 'rating', 'review', 'createdAt']) &&
+        validString(data.reviewId, 1, 128) &&
+        validString(data.reviewerId, 1, 128) &&
+        validString(data.reviewedUserId, 1, 128) &&
+        data.reviewerId != data.reviewedUserId &&
+        data.rating is number && data.rating >= 1 && data.rating <= 5 &&
+        validString(data.review, 2, 2000) &&
+        isValidDate(data.createdAt);
+    }
+
+    // Validator for /reports/{reportId}
+    function isValidReport(data) {
+      return hasOnlyAllowedFields(['reportId', 'reporterId', 'reportedUserId', 'jobId', 'reason', 'status', 'createdAt', 'type', 'targetId', 'details', 'actionTaken']) &&
+        hasRequiredFields(['reportId', 'reporterId', 'reason', 'status', 'createdAt']) &&
+        validString(data.reportId, 1, 128) &&
+        validString(data.reporterId, 1, 128) &&
+        validString(data.reason, 2, 300) &&
+        data.status in ['pending_review', 'investigating', 'resolved', 'dismissed', 'pending', 'Submitted'] &&
+        isValidDate(data.createdAt) &&
+        isValidOptionalString(data, 'reportedUserId', 1, 128) &&
+        isValidOptionalString(data, 'jobId', 1, 128) &&
+        isValidOptionalString(data, 'type', 1, 50) &&
+        isValidOptionalString(data, 'targetId', 1, 128) &&
+        isValidOptionalString(data, 'details', 0, 3000) &&
+        isValidOptionalString(data, 'actionTaken', 0, 1000);
+    }
+
+
+    // ===============================================================
+    // Collection Security Rules
+    // ===============================================================
+
+    // 1. /users/{userId}
+    // Base profiles. Authenticated users can read profiles; owners can update their own profile; admins can manage.
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+
+      allow create: if isAuthenticated() &&
+        isValidUser(request.resource.data) &&
+        request.resource.data.userId == userId &&
+        (
+          (isOwner(userId) && request.resource.data.role in ['seeker', 'employer']) ||
+          isAdmin()
+        );
+
+      allow update: if isAuthenticated() &&
+        isValidUser(request.resource.data) &&
+        (
+          // Regular owner cannot change userId, createdAt, role, or verification status
+          (
+            isOwner(userId) &&
+            request.resource.data.role == resource.data.role &&
+            areImmutableFieldsUnchanged(['userId', 'createdAt', 'role', 'isVerified'])
+          ) ||
+          // Admins can manage roles and verification status
+          (
+            isAdmin() &&
+            areImmutableFieldsUnchanged(['userId', 'createdAt'])
+          )
+        );
+
+      allow delete: if isAdmin();
+    }
+
+    // 2. /jobSeekerProfiles/{userId}
+    // Extended seeker attributes. Public/registered users can read; only owner can write.
+    match /jobSeekerProfiles/{userId} {
+      allow read: if true;
+
+      allow create: if isOwner(userId) &&
+        isValidJobSeekerProfile(request.resource.data) &&
+        request.resource.data.userId == userId &&
+        // Prevent owners from inflating their initial rating/review count on creation
+        request.resource.data.get('reviewsCount', 0) == 0;
+
+      allow update: if isOwner(userId) &&
+        isValidJobSeekerProfile(request.resource.data) &&
+        // Protect identity and prevent self-rating tampering
+        areImmutableFieldsUnchanged(['userId', 'rating', 'reviewsCount']);
+
+      allow delete: if isOwner(userId) || isAdmin();
+    }
+
+    // 3. /employerProfiles/{userId}
+    // Employer business details. Public/registered users can read; only owner can write; verificationStatus can only be updated by admin.
+    match /employerProfiles/{userId} {
+      allow read: if true;
+
+      allow create: if isOwner(userId) &&
+        isValidEmployerProfile(request.resource.data) &&
+        request.resource.data.userId == userId &&
+        // New profiles cannot self-certify as Verified Employer
+        request.resource.data.verificationStatus in ['Pending Verification', 'Unverified'] &&
+        request.resource.data.get('reviewsCount', 0) == 0;
+
+      allow update: if isAuthenticated() &&
+        isValidEmployerProfile(request.resource.data) &&
+        (
+          // Owner can update business info, but CANNOT modify verificationStatus, rating, reviewsCount, or userId
+          (
+            isOwner(userId) &&
+            areImmutableFieldsUnchanged(['userId', 'verificationStatus', 'rating', 'reviewsCount'])
+          ) ||
+          // Admin can update verification status and manage profiles
+          (
+            isAdmin() &&
+            areImmutableFieldsUnchanged(['userId'])
+          )
+        );
+
+      allow delete: if isOwner(userId) || isAdmin();
+    }
+
+    // 4. /jobs/{jobId}
+    // Local job listings. Anyone can read active jobs; only employer who created it can update/delete; only authenticated employers can create.
+    match /jobs/{jobId} {
+      // Anyone can read active jobs; creator employer or admin can read paused/closed jobs
+      allow read: if resource.data.status == 'active' ||
+        (isAuthenticated() && (request.auth.uid == resource.data.employerId || isAdmin()));
+
+      allow create: if isEmployer() &&
+        isValidJob(request.resource.data) &&
+        request.resource.data.jobId == jobId &&
+        request.resource.data.employerId == request.auth.uid &&
+        request.resource.data.status in ['active', 'paused'];
+
+      allow update: if isAuthenticated() &&
+        isValidJob(request.resource.data) &&
+        (
+          // Only employer who created it can update, cannot transfer ownership or tamper with jobId / createdAt
+          (
+            request.auth.uid == resource.data.employerId &&
+            areImmutableFieldsUnchanged(['jobId', 'employerId', 'createdAt'])
+          ) ||
+          (
+            isAdmin() &&
+            areImmutableFieldsUnchanged(['jobId', 'employerId', 'createdAt'])
+          )
+        );
+
+      allow delete: if isAuthenticated() &&
+        (request.auth.uid == resource.data.employerId || isAdmin());
+    }
+
+    // 5. /applications/{applicationId}
+    // Job applications. Only applicant and target employer can read; only applicant can create; only employer can update status.
+    match /applications/{applicationId} {
+      allow read: if isAuthenticated() &&
+        (request.auth.uid == resource.data.applicantId || request.auth.uid == resource.data.employerId || isAdmin());
+
+      allow create: if isAuthenticated() &&
+        isValidApplication(request.resource.data) &&
+        request.resource.data.applicationId == applicationId &&
+        request.resource.data.applicantId == request.auth.uid &&
+        request.resource.data.status == 'Submitted';
+
+      allow update: if isAuthenticated() &&
+        isValidApplication(request.resource.data) &&
+        (
+          // Only employer can update status, all applicant details, jobId, and IDs remain immutable
+          (
+            request.auth.uid == resource.data.employerId &&
+            request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']) &&
+            request.resource.data.status in ['Submitted', 'Viewed', 'Shortlisted', 'Rejected', 'Hired']
+          ) ||
+          isAdmin()
+        );
+
+      allow delete: if isAuthenticated() &&
+        (request.auth.uid == resource.data.applicantId || isAdmin());
+    }
+
+    // 6. /messages/{messageId}
+    // Direct messages. Only sender and receiver can read/write.
+    match /messages/{messageId} {
+      allow read: if isAuthenticated() &&
+        (request.auth.uid == resource.data.senderId || request.auth.uid == resource.data.receiverId || isAdmin());
+
+      allow create: if isAuthenticated() &&
+        isValidMessage(request.resource.data) &&
+        request.resource.data.messageId == messageId &&
+        request.resource.data.senderId == request.auth.uid &&
+        request.resource.data.readStatus == false;
+
+      allow update: if isAuthenticated() &&
+        isValidMessage(request.resource.data) &&
+        areImmutableFieldsUnchanged(['messageId', 'senderId', 'receiverId', 'jobId', 'timestamp']) &&
+        (
+          // Receiver can mark message as read
+          (
+            request.auth.uid == resource.data.receiverId &&
+            request.resource.data.diff(resource.data).affectedKeys().hasOnly(['readStatus'])
+          ) ||
+          // Sender can edit their message content while preserving other metadata
+          (
+            request.auth.uid == resource.data.senderId &&
+            request.resource.data.diff(resource.data).affectedKeys().hasOnly(['message'])
+          ) ||
+          isAdmin()
+        );
+
+      allow delete: if isAuthenticated() &&
+        (request.auth.uid == resource.data.senderId || isAdmin());
+    }
+
+    // 7. /reviews/{reviewId}
+    // Ratings and feedback. Anyone can read; authenticated reviewer can create; cannot review self.
+    match /reviews/{reviewId} {
+      allow read: if true;
+
+      allow create: if isAuthenticated() &&
+        isValidReview(request.resource.data) &&
+        request.resource.data.reviewId == reviewId &&
+        request.resource.data.reviewerId == request.auth.uid &&
+        request.resource.data.reviewedUserId != request.auth.uid;
+
+      allow update: if isAuthenticated() &&
+        isValidReview(request.resource.data) &&
+        (
+          (
+            request.auth.uid == resource.data.reviewerId &&
+            areImmutableFieldsUnchanged(['reviewId', 'reviewerId', 'reviewedUserId', 'createdAt'])
+          ) ||
+          isAdmin()
+        );
+
+      allow delete: if isAuthenticated() &&
+        (request.auth.uid == resource.data.reviewerId || isAdmin());
+    }
+
+    // 8. /reports/{reportId}
+    // Trust & Safety reports. Authenticated user can create report; only admins can read and update.
+    match /reports/{reportId} {
+      allow read: if isAdmin();
+
+      allow create: if isAuthenticated() &&
+        isValidReport(request.resource.data) &&
+        request.resource.data.reportId == reportId &&
+        request.resource.data.reporterId == request.auth.uid &&
+        request.resource.data.status in ['pending_review', 'pending', 'Submitted'];
+
+      allow update: if isAdmin() &&
+        isValidReport(request.resource.data) &&
+        areImmutableFieldsUnchanged(['reportId', 'reporterId', 'createdAt']);
+
+      allow delete: if isAdmin();
+    }
+  }
+}

@@ -1,0 +1,516 @@
+/**
+ * HireNear Realistic Sample Data
+ * Seed data for Indian local employment ecosystem (Hyderabad baseline).
+ */
+
+export const INITIAL_CATEGORIES = [
+  { id: "all", name: "All Jobs", icon: "briefcase", color: "from-blue-500 to-indigo-600" },
+  { id: "education", name: "Education & Tuition", icon: "book-open", color: "from-emerald-500 to-teal-600" },
+  { id: "domestic", name: "Domestic & Home Care", icon: "home", color: "from-amber-500 to-orange-600" },
+  { id: "delivery", name: "Delivery & Logistics", icon: "bike", color: "from-purple-500 to-violet-600" },
+  { id: "sales", name: "Sales & Retail", icon: "shopping-bag", color: "from-pink-500 to-rose-600" },
+  { id: "office", name: "Office & Documentation", icon: "file-text", color: "from-cyan-500 to-blue-600" },
+  { id: "technical", name: "Electrician & Technical", icon: "tool", color: "from-yellow-500 to-amber-600" },
+  { id: "hospitality", name: "Hospitality & Cafe", icon: "coffee", color: "from-red-500 to-orange-600" },
+  { id: "events", name: "Events & Temporary", icon: "calendar", color: "from-indigo-500 to-purple-600" },
+  { id: "driving", name: "Drivers & Transport", icon: "truck", color: "from-slate-600 to-slate-800" },
+  { id: "student", name: "Student Friendly", icon: "graduation-cap", color: "from-teal-500 to-emerald-600" }
+];
+
+export const INITIAL_USERS = [
+  {
+    userId: "seeker-1",
+    name: "Rahul Sharma",
+    phone: "+91 98765 43210",
+    email: "rahul.sharma@example.com",
+    role: "seeker",
+    location: "Kukatpally, Hyderabad",
+    profilePhoto: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=200&auto=format&fit=crop&q=80",
+    about: "Final year B.Sc. student looking for local evening tutoring, computer operation, or part-time store assistant roles.",
+    skills: ["Mathematics", "Science", "Computer Basics", "MS Excel", "English", "Hindi"],
+    education: "B.Sc. Computer Science (Final Year, JNTU)",
+    experience: "1+ year private tutoring",
+    preferredJobType: ["Part-Time", "Weekend", "Student Jobs"],
+    expectedSalary: 9500,
+    salaryType: "per month",
+    availability: "Immediate (Evenings after 4 PM & Weekends)",
+    languages: ["English", "Hindi", "Telugu"],
+    contactPreference: "In-app Chat & WhatsApp",
+    isVerified: true,
+    rating: 4.9,
+    reviewsCount: 14,
+    createdAt: "2026-09-01T10:00:00Z"
+  },
+  {
+    userId: "seeker-2",
+    name: "Kavita Devi",
+    phone: "+91 98490 11223",
+    email: "kavita.devi@example.com",
+    role: "seeker",
+    location: "Miyapur, Hyderabad",
+    profilePhoto: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&auto=format&fit=crop&q=80",
+    about: "Trustworthy and experienced domestic cook & housekeeper with 4 years background in family apartments.",
+    skills: ["Cooking", "Housekeeping", "Child Care", "Hygiene Maintenance", "Vegetarian & South Indian meals"],
+    education: "Secondary School (10th Standard)",
+    experience: "4 years family residential cook",
+    preferredJobType: ["Part-Time", "Full-Time"],
+    expectedSalary: 8500,
+    salaryType: "per month",
+    availability: "Morning Shift (7:00 AM - 1:00 PM)",
+    languages: ["Hindi", "Telugu"],
+    contactPreference: "Phone Call",
+    isVerified: true,
+    rating: 4.8,
+    reviewsCount: 19,
+    createdAt: "2026-08-15T12:00:00Z"
+  },
+  {
+    userId: "seeker-3",
+    name: "Mohammed Arif",
+    phone: "+91 97000 88991",
+    email: "arif.delivery@example.com",
+    role: "seeker",
+    location: "Uppal, Hyderabad",
+    profilePhoto: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&auto=format&fit=crop&q=80",
+    about: "Punctual delivery partner with own two-wheeler, valid driving license, and complete city route knowledge.",
+    skills: ["Driving", "Two-Wheeler", "Smartphone Navigation", "Delivery Logistics", "Punctuality"],
+    education: "Intermediate (12th Pass)",
+    experience: "2 years e-commerce delivery partner",
+    preferredJobType: ["Full-Time", "Temporary"],
+    expectedSalary: 15000,
+    salaryType: "per month",
+    availability: "Immediate",
+    languages: ["Hindi", "Telugu", "Basic English"],
+    contactPreference: "In-app Chat & Phone",
+    isVerified: true,
+    rating: 4.7,
+    reviewsCount: 22,
+    createdAt: "2026-09-10T14:30:00Z"
+  },
+  {
+    userId: "employer-1",
+    name: "Priya Reddy",
+    businessName: "ABC Learning & Tuitions",
+    phone: "+91 98111 22334",
+    email: "priya.reddy@abclearning.in",
+    role: "employer",
+    location: "Kukatpally, Hyderabad",
+    profilePhoto: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=200&auto=format&fit=crop&q=80",
+    about: "Neighborhood study center providing supplemental education for school students in Classes 5-10.",
+    verificationStatus: "Verified Employer",
+    isVerified: true,
+    rating: 4.8,
+    reviewsCount: 26,
+    previouslyPosted: 8,
+    createdAt: "2026-07-20T09:00:00Z"
+  },
+  {
+    userId: "employer-2",
+    name: "Vikram Singhania",
+    businessName: "Metro Retail Hub",
+    phone: "+91 99222 33445",
+    email: "vikram@metroretail.com",
+    role: "employer",
+    location: "Secunderabad",
+    profilePhoto: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=200&auto=format&fit=crop&q=80",
+    about: "Multi-brand garment and consumer goods retail store operating in Secunderabad for 7 years.",
+    verificationStatus: "Verified Employer",
+    isVerified: true,
+    rating: 4.6,
+    reviewsCount: 31,
+    previouslyPosted: 12,
+    createdAt: "2026-06-15T11:00:00Z"
+  },
+  {
+    userId: "admin-1",
+    name: "HireNear Safety Desk",
+    email: "admin@hirenear.local",
+    role: "admin",
+    location: "Hyderabad HQ",
+    profilePhoto: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&auto=format&fit=crop&q=80"
+  }
+];
+
+export const INITIAL_JOBS = [
+  {
+    jobId: "job-101",
+    employerId: "employer-1",
+    employerName: "ABC Learning & Tuitions",
+    employerVerified: true,
+    employerRating: 4.8,
+    title: "Home Tutor (Maths & Science)",
+    category: "education",
+    description: "Looking for an energetic, patient tutor for a Class 8 ICSE student. Primary focus on Mathematics fundamentals and General Science. Convenient 1.5 hours daily session.",
+    responsibilities: [
+      "Teach Class 8 Math & Science concepts clearly",
+      "Help with daily school homework & concept revision",
+      "Conduct weekly mock tests and review mistakes",
+      "Provide constructive feedback to parents every fortnight"
+    ],
+    skills: ["Mathematics", "Science", "Teaching", "English Communication"],
+    location: "Kukatpally, Hyderabad",
+    salary: 12000,
+    salaryType: "per month",
+    salaryDisplay: "₹10,000 - ₹12,000/month",
+    jobType: "Part-Time",
+    workingHours: "5:00 PM – 6:30 PM (Mon to Fri)",
+    experience: "Fresher / College Students Welcome",
+    openings: 2,
+    deadline: "2026-10-25",
+    createdAt: "2026-10-02T09:30:00Z",
+    status: "active",
+    featured: true
+  },
+  {
+    jobId: "job-102",
+    employerId: "employer-2",
+    employerName: "Metro Retail Hub",
+    employerVerified: true,
+    employerRating: 4.6,
+    title: "Store Sales Executive",
+    category: "sales",
+    description: "Require an active salesperson for our retail showroom counter. Must be polite, prompt in customer interactions, and capable of handling cash/billing.",
+    responsibilities: [
+      "Greet customers walking into the showroom",
+      "Showcase garments, assist with sizing and product choices",
+      "Maintain tidy rack displays and price tagging",
+      "Handle barcode billing and digital payments"
+    ],
+    skills: ["Sales", "Customer Service", "Billing", "Telugu & Hindi"],
+    location: "Secunderabad",
+    salary: 18000,
+    salaryType: "per month",
+    salaryDisplay: "₹16,000 - ₹18,000/month",
+    jobType: "Full-Time",
+    workingHours: "10:30 AM – 8:30 PM",
+    experience: "6 months - 2 years",
+    openings: 3,
+    deadline: "2026-10-30",
+    createdAt: "2026-10-01T11:00:00Z",
+    status: "active",
+    featured: true
+  },
+  {
+    jobId: "job-103",
+    employerId: "employer-1",
+    employerName: "Sai Wellness Dental Clinic",
+    employerVerified: true,
+    employerRating: 4.9,
+    title: "Front Desk & Clinic Receptionist",
+    category: "office",
+    description: "Seeking a well-mannered front desk receptionist to coordinate patient appointments, answer phone inquiries, and maintain basic patient registers on computer.",
+    responsibilities: [
+      "Manage front desk and receive incoming patients warmly",
+      "Book and confirm doctor consultation appointments",
+      "Generate patient invoices using easy software",
+      "Maintain day-to-day cleanliness of front desk"
+    ],
+    skills: ["Computer Basics", "MS Excel", "Communication", "Appointment Scheduling"],
+    location: "Kukatpally, Hyderabad",
+    salary: 10500,
+    salaryType: "per month",
+    salaryDisplay: "₹9,500 - ₹10,500/month",
+    jobType: "Part-Time",
+    workingHours: "9:00 AM – 1:30 PM (Morning slot)",
+    experience: "Fresher / 6 months",
+    openings: 1,
+    deadline: "2026-10-20",
+    createdAt: "2026-10-03T14:15:00Z",
+    status: "active",
+    featured: false
+  },
+  {
+    jobId: "job-104",
+    employerId: "employer-1",
+    employerName: "Dr. K. Rao Residence",
+    employerVerified: true,
+    employerRating: 5.0,
+    title: "Housekeeper & Morning Cook",
+    category: "domestic",
+    description: "Looking for an honest, dependable person for daily morning cooking and light apartment housekeeping for a family of 3 near Miyapur Metro.",
+    responsibilities: [
+      "Prepare simple, hygienic breakfast and packed lunch for 3 people",
+      "Daily sweeping, mopping, and kitchen cleanup",
+      "Vessel washing with dish sanitizer"
+    ],
+    skills: ["Cooking", "Housekeeping", "Hygiene", "Reliability"],
+    location: "Miyapur, Hyderabad",
+    salary: 8500,
+    salaryType: "per month",
+    salaryDisplay: "₹8,500/month",
+    jobType: "Part-Time",
+    workingHours: "7:00 AM – 10:00 AM",
+    experience: "1+ year experience in household",
+    openings: 1,
+    deadline: "2026-10-18",
+    createdAt: "2026-10-04T08:00:00Z",
+    status: "active",
+    featured: false
+  },
+  {
+    jobId: "job-105",
+    employerId: "employer-2",
+    employerName: "Express Local Delivery Co.",
+    employerVerified: true,
+    employerRating: 4.5,
+    title: "Delivery Partner (Two-Wheeler)",
+    category: "delivery",
+    description: "Fast-growing delivery hub in Uppal hiring delivery partners for localized parcel drop-offs. Flexible shift timings with daily fuel allowance and incentives.",
+    responsibilities: [
+      "Pick up assigned delivery bags from Uppal hub",
+      "Deliver orders within 5 km localized radius",
+      "Collect customer signatures and digital OTP confirmations",
+      "Deposit COD cash at evening checkout"
+    ],
+    skills: ["Two-Wheeler", "Driving License", "Smartphone", "Route Navigation"],
+    location: "Uppal, Hyderabad",
+    salary: 15500,
+    salaryType: "per month",
+    salaryDisplay: "₹14,000 - ₹17,000/month + Incentives",
+    jobType: "Full-Time",
+    workingHours: "10:00 AM – 7:00 PM",
+    experience: "Freshers can apply",
+    openings: 5,
+    deadline: "2026-11-05",
+    createdAt: "2026-10-02T16:45:00Z",
+    status: "active",
+    featured: true
+  },
+  {
+    jobId: "job-106",
+    employerId: "employer-1",
+    employerName: "Sri Balaji Documentation Center",
+    employerVerified: true,
+    employerRating: 4.7,
+    title: "Computer Operator & DTP Assistant",
+    category: "office",
+    description: "Required computer operator for MeeSeva and document typing center. Knowledge of English/Telugu typing, Aadhaar updates, and scan/print operations preferred.",
+    responsibilities: [
+      "Type legal and government forms accurately",
+      "Execute online government portal filings and submissions",
+      "Scan, photocopy, and print customer certificates",
+      "Manage customer billing desk"
+    ],
+    skills: ["Computer Basics", "MS Office", "Typing", "Internet Browsing"],
+    location: "Dilsukhnagar, Hyderabad",
+    salary: 12000,
+    salaryType: "per month",
+    salaryDisplay: "₹11,000 - ₹12,500/month",
+    jobType: "Full-Time",
+    workingHours: "9:30 AM – 7:00 PM",
+    experience: "Fresher or 6 months",
+    openings: 2,
+    deadline: "2026-10-28",
+    createdAt: "2026-09-29T10:00:00Z",
+    status: "active",
+    featured: false
+  },
+  {
+    jobId: "job-107",
+    employerId: "employer-2",
+    employerName: "Royal Celebrations Event Co.",
+    employerVerified: true,
+    employerRating: 4.8,
+    title: "Weekend Event Coordinator & Helper",
+    category: "events",
+    description: "Urgent opening for energetic weekend helpers for a 2-day corporate expo & wedding banquet in Gachibowli. Food, transport, and daily spot pay provided.",
+    responsibilities: [
+      "Assist event managers with stage setup and banquet seating",
+      "Guide guests to registration desks and auditoriums",
+      "Distribute guest badges and welcome kits",
+      "Coordinate with catering staff"
+    ],
+    skills: ["Communication", "Teamwork", "Punctuality", "Student Friendly"],
+    location: "Gachibowli, Hyderabad",
+    salary: 750,
+    salaryType: "per day",
+    salaryDisplay: "₹750/day (Meals provided)",
+    jobType: "Weekend",
+    workingHours: "8:00 AM – 6:00 PM (Saturday & Sunday)",
+    experience: "No prior experience required",
+    openings: 8,
+    deadline: "2026-10-12",
+    createdAt: "2026-10-04T12:00:00Z",
+    status: "active",
+    featured: true
+  },
+  {
+    jobId: "job-108",
+    employerId: "employer-1",
+    employerName: "QuickFix Electricals",
+    employerVerified: true,
+    employerRating: 4.9,
+    title: "Assistant Electrician / Wireman",
+    category: "technical",
+    description: "Looking for an ITI electrician or experienced wireman for residential house wiring, inverter battery servicing, and fan/switchboard installations.",
+    responsibilities: [
+      "Troubleshoot electrical faults in domestic apartments",
+      "Install switchboards, LED lighting fixtures, and geysers",
+      "Assist master electrician with conduit wiring"
+    ],
+    skills: ["Electrical Wiring", "Appliance Repair", "Safety Standards", "Tools Handling"],
+    location: "Kondapur, Hyderabad",
+    salary: 800,
+    salaryType: "per day",
+    salaryDisplay: "₹800/day + Commute",
+    jobType: "Temporary",
+    workingHours: "9:00 AM – 6:00 PM",
+    experience: "1+ year practical trade experience",
+    openings: 2,
+    deadline: "2026-10-22",
+    createdAt: "2026-10-03T11:20:00Z",
+    status: "active",
+    featured: false
+  }
+];
+
+export const INITIAL_APPLICATIONS = [
+  {
+    applicationId: "app-201",
+    jobId: "job-101",
+    applicantId: "seeker-1",
+    applicantName: "Rahul Sharma",
+    applicantPhoto: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=200&auto=format&fit=crop&q=80",
+    jobTitle: "Home Tutor (Maths & Science)",
+    employerId: "employer-1",
+    employerName: "ABC Learning & Tuitions",
+    location: "Kukatpally, Hyderabad",
+    skills: ["Mathematics", "Science", "MS Excel", "English"],
+    experience: "1+ year private tutoring",
+    expectedSalary: 9500,
+    availability: "Available immediately after 4 PM",
+    message: "Respected Madam, I am a B.Sc. student living in Kukatpally (just 1.5 km away). I have consistently tutored Class 7-9 ICSE students with 90%+ scores. Would love to teach!",
+    resumeNote: "Verified B.Sc. Student Profile & Class 12 ICSE 92% Marksheet Attached",
+    status: "Shortlisted",
+    appliedAt: "2026-10-02T14:20:00Z"
+  },
+  {
+    applicationId: "app-202",
+    jobId: "job-104",
+    applicantId: "seeker-2",
+    applicantName: "Kavita Devi",
+    applicantPhoto: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&auto=format&fit=crop&q=80",
+    jobTitle: "Housekeeper & Morning Cook",
+    employerId: "employer-1",
+    employerName: "Dr. K. Rao Residence",
+    location: "Miyapur, Hyderabad",
+    skills: ["Cooking", "Housekeeping", "Child Care"],
+    experience: "4 years family residential cook",
+    expectedSalary: 8500,
+    availability: "Morning 7 AM to 10 AM",
+    message: "Namaste, I live near Miyapur metro station. I prepare hygienic South Indian and North Indian food. I have good references from doctors in Miyapur.",
+    resumeNote: "Aadhaar Verified & Police Verification Cleared",
+    status: "Submitted",
+    appliedAt: "2026-10-04T09:15:00Z"
+  },
+  {
+    applicationId: "app-203",
+    jobId: "job-105",
+    applicantId: "seeker-3",
+    applicantName: "Mohammed Arif",
+    applicantPhoto: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&auto=format&fit=crop&q=80",
+    jobTitle: "Delivery Partner (Two-Wheeler)",
+    employerId: "employer-2",
+    employerName: "Metro Retail Hub",
+    location: "Uppal, Hyderabad",
+    skills: ["Two-Wheeler", "Driving License", "Smartphone Navigation"],
+    experience: "2 years e-commerce delivery partner",
+    expectedSalary: 15000,
+    availability: "Immediate full-time",
+    message: "Sir, I have my own Pulsar bike and smart phone. Know all routes from Uppal to Habsiguda and Ramanthapur. Can join tomorrow.",
+    resumeNote: "Driving License No: TS0920210088921",
+    status: "Viewed",
+    appliedAt: "2026-10-03T18:00:00Z"
+  }
+];
+
+export const INITIAL_MESSAGES = [
+  {
+    messageId: "msg-301",
+    conversationId: "conv-seeker-1_employer-1",
+    jobId: "job-101",
+    jobTitle: "Home Tutor (Maths & Science)",
+    senderId: "employer-1",
+    senderName: "Priya Reddy",
+    receiverId: "seeker-1",
+    message: "Hello Rahul! We reviewed your profile and tutoring background. Can you come by tomorrow at 4:30 PM for a quick 10-minute demo session with the student?",
+    timestamp: "2026-10-03T16:00:00Z",
+    readStatus: true
+  },
+  {
+    messageId: "msg-302",
+    conversationId: "conv-seeker-1_employer-1",
+    jobId: "job-101",
+    jobTitle: "Home Tutor (Maths & Science)",
+    senderId: "seeker-1",
+    senderName: "Rahul Sharma",
+    receiverId: "employer-1",
+    message: "Thank you Priya ma'am! Yes, absolutely. 4:30 PM works perfectly. I will bring the sample Class 8 worksheets.",
+    timestamp: "2026-10-03T16:15:00Z",
+    readStatus: true
+  },
+  {
+    messageId: "msg-303",
+    conversationId: "conv-seeker-1_employer-1",
+    jobId: "job-101",
+    jobTitle: "Home Tutor (Maths & Science)",
+    senderId: "employer-1",
+    senderName: "Priya Reddy",
+    receiverId: "seeker-1",
+    message: "Great! Our center is beside Kukatpally Metro Pillar #A782. See you tomorrow!",
+    timestamp: "2026-10-03T16:20:00Z",
+    readStatus: false
+  }
+];
+
+export const INITIAL_NOTIFICATIONS = [
+  {
+    notificationId: "notif-401",
+    userId: "seeker-1",
+    type: "shortlisted",
+    title: "You're Shortlisted! 🎉",
+    body: "ABC Learning shortlisted your application for Home Tutor (Maths & Science). Check messages.",
+    time: "2 hours ago",
+    read: false,
+    link: "messages"
+  },
+  {
+    notificationId: "notif-402",
+    userId: "seeker-1",
+    type: "ai_match",
+    title: "New AI Match 🤖 (94%)",
+    body: "A new Part-Time Front Desk & Clinic Assistant in Kukatpally matches your computer skills.",
+    time: "5 hours ago",
+    read: false,
+    link: "job-103"
+  },
+  {
+    notificationId: "notif-403",
+    userId: "employer-1",
+    type: "new_application",
+    title: "New Application Received 📝",
+    body: "Rahul Sharma applied for Home Tutor (Maths & Science) with 94% AI Match Score.",
+    time: "1 day ago",
+    read: true,
+    link: "applications"
+  }
+];
+
+export const COMMUNITY_GUIDELINES = [
+  {
+    title: "Zero Advance Payment Policy",
+    desc: "HireNear strictly prohibits employers from demanding registration fees, security deposits, uniform costs, or processing charges. Any job requiring advance money is an automatic scam and should be reported immediately."
+  },
+  {
+    title: "Safe Local Meetings",
+    desc: "Always meet in a public location or established business center for your initial interview. Keep a family member or friend informed of your meeting location."
+  },
+  {
+    title: "Privacy & Approximate Locations",
+    desc: "HireNear shows neighborhood-level proximity (e.g. Kukatpally, ~2.5 km away) rather than pinpointing private residential addresses until a formal application is accepted."
+  },
+  {
+    title: "Mutual Respect & Fair Wages",
+    desc: "We believe in dignified work and prompt payments. Fair wages and clear working hours must be agreed upon before beginning any task."
+  }
+];

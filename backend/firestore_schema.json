@@ -1,0 +1,151 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "HireNear Firestore Database Schema",
+  "version": "1.0.0",
+  "collections": {
+    "users": {
+      "description": "Base user accounts (Job Seekers, Employers, Admins)",
+      "documentId": "userId",
+      "fields": {
+        "userId": { "type": "string", "description": "Unique user ID (e.g. Firebase Auth UID)" },
+        "name": { "type": "string", "description": "Full name of the user" },
+        "email": { "type": "string", "format": "email" },
+        "phone": { "type": "string", "description": "Mobile number with country code (e.g. +91 98765 43210)" },
+        "role": { "type": "string", "enum": ["seeker", "employer", "admin"] },
+        "location": { "type": "string", "description": "Primary locality/city (e.g. Kukatpally, Hyderabad)" },
+        "profilePhoto": { "type": "string", "format": "uri" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "isVerified": { "type": "boolean", "default": false }
+      }
+    },
+    "jobSeekerProfiles": {
+      "description": "Extended profile attributes specific to Job Seekers",
+      "documentId": "userId",
+      "fields": {
+        "userId": { "type": "string" },
+        "about": { "type": "string" },
+        "skills": { "type": "array", "items": { "type": "string" } },
+        "education": { "type": "string" },
+        "experience": { "type": "string" },
+        "preferredJobType": { "type": "array", "items": { "type": "string", "enum": ["Part-Time", "Full-Time", "Temporary", "Weekend", "Remote", "Internship", "Student Jobs"] } },
+        "expectedSalary": { "type": "number", "description": "Monthly or periodic expected wage in INR" },
+        "salaryType": { "type": "string", "default": "per month" },
+        "availability": { "type": "string", "description": "Immediate, evening, weekend, etc." },
+        "languages": { "type": "array", "items": { "type": "string" } },
+        "contactPreference": { "type": "string", "enum": ["In-app Chat & WhatsApp", "Phone Call", "In-app Chat Only"] },
+        "rating": { "type": "number", "default": 5.0 },
+        "reviewsCount": { "type": "number", "default": 0 }
+      }
+    },
+    "employerProfiles": {
+      "description": "Business or household employer credentials and details",
+      "documentId": "userId",
+      "fields": {
+        "userId": { "type": "string" },
+        "businessName": { "type": "string" },
+        "about": { "type": "string" },
+        "location": { "type": "string" },
+        "verificationStatus": { "type": "string", "enum": ["Verified Employer", "Pending Verification", "Unverified"] },
+        "rating": { "type": "number", "default": 5.0 },
+        "reviewsCount": { "type": "number", "default": 0 },
+        "previouslyPosted": { "type": "number", "default": 0 }
+      }
+    },
+    "jobs": {
+      "description": "Local job listings posted by employers",
+      "documentId": "jobId",
+      "fields": {
+        "jobId": { "type": "string" },
+        "employerId": { "type": "string" },
+        "employerName": { "type": "string" },
+        "employerVerified": { "type": "boolean" },
+        "title": { "type": "string" },
+        "category": { "type": "string", "enum": ["education", "sales", "retail", "domestic", "delivery", "office", "technical", "hospitality", "events", "driving", "student", "other"] },
+        "description": { "type": "string" },
+        "responsibilities": { "type": "array", "items": { "type": "string" } },
+        "skills": { "type": "array", "items": { "type": "string" } },
+        "location": { "type": "string" },
+        "salary": { "type": "number" },
+        "salaryType": { "type": "string", "enum": ["per month", "per day", "per hour", "fixed"] },
+        "salaryDisplay": { "type": "string" },
+        "jobType": { "type": "string", "enum": ["Part-Time", "Full-Time", "Temporary", "Weekend", "Student-friendly", "Remote"] },
+        "workingHours": { "type": "string" },
+        "experience": { "type": "string" },
+        "openings": { "type": "integer", "minimum": 1 },
+        "deadline": { "type": "string", "format": "date" },
+        "status": { "type": "string", "enum": ["active", "paused", "closed"] },
+        "featured": { "type": "boolean", "default": false },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "indexes": [
+        { "fields": ["category", "status", "createdAt"] },
+        { "fields": ["location", "status", "createdAt"] },
+        { "fields": ["employerId", "status"] }
+      ]
+    },
+    "applications": {
+      "description": "Applications submitted by seekers for jobs",
+      "documentId": "applicationId",
+      "fields": {
+        "applicationId": { "type": "string" },
+        "jobId": { "type": "string" },
+        "applicantId": { "type": "string" },
+        "employerId": { "type": "string" },
+        "applicantName": { "type": "string" },
+        "jobTitle": { "type": "string" },
+        "skills": { "type": "array", "items": { "type": "string" } },
+        "expectedSalary": { "type": "number" },
+        "availability": { "type": "string" },
+        "message": { "type": "string" },
+        "resumeNote": { "type": "string" },
+        "status": { "type": "string", "enum": ["Submitted", "Viewed", "Shortlisted", "Rejected", "Hired"] },
+        "appliedAt": { "type": "string", "format": "date-time" }
+      },
+      "indexes": [
+        { "fields": ["applicantId", "appliedAt"] },
+        { "fields": ["employerId", "jobId", "status"] }
+      ]
+    },
+    "messages": {
+      "description": "Direct communication between seeker and employer",
+      "documentId": "messageId",
+      "fields": {
+        "messageId": { "type": "string" },
+        "jobId": { "type": "string" },
+        "jobTitle": { "type": "string" },
+        "senderId": { "type": "string" },
+        "senderName": { "type": "string" },
+        "receiverId": { "type": "string" },
+        "message": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "readStatus": { "type": "boolean", "default": false }
+      }
+    },
+    "reviews": {
+      "description": "Post-job mutual rating and reviews",
+      "documentId": "reviewId",
+      "fields": {
+        "reviewId": { "type": "string" },
+        "reviewerId": { "type": "string" },
+        "reviewedUserId": { "type": "string" },
+        "rating": { "type": "number", "minimum": 1, "maximum": 5 },
+        "review": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "reports": {
+      "description": "Trust & Safety reports filed against suspicious jobs or users",
+      "documentId": "reportId",
+      "fields": {
+        "reportId": { "type": "string" },
+        "reporterId": { "type": "string" },
+        "type": { "type": "string", "enum": ["job", "user"] },
+        "targetId": { "type": "string" },
+        "reason": { "type": "string", "enum": ["Advance payment scam / demand", "Misleading salary / job details", "Inappropriate behavior", "Fake profile", "Other"] },
+        "details": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending_review", "investigating", "resolved", "dismissed"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    }
+  }
+}

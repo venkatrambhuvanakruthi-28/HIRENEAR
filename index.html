@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>HireNear — Find Jobs. Find People. Hire Near.</title>
+  <meta name="description" content="HireNear is a modern, local job marketplace connecting people who need workers with people looking for part-time, full-time, temporary, and local jobs.">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdfa',
+              100: '#ccfbf1',
+              500: '#14b8a6',
+              600: '#0d9488',
+              700: '#0f766e',
+              800: '#115e59',
+              900: '#134e4a',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- Top Developer / Showcase Bar (Allows testing Mobile Frame vs Desktop Responsive + Instant Role Switching) -->
+  <header class="dev-toolbar">
+    <div class="dev-badge-brand">
+      <span class="flex items-center justify-center w-7 h-7 rounded-lg bg-teal-600 text-white font-black text-sm shadow-sm">HN</span>
+      <span class="text-white font-bold text-base tracking-tight">HireNear</span>
+      <span class="text-xs px-2 py-0.5 rounded-full bg-teal-950 text-teal-300 border border-teal-800 font-medium">Local + AI MVP</span>
+    </div>
+
+    <div class="dev-actions">
+      <!-- Device View Toggle -->
+      <div class="inline-flex rounded-lg bg-slate-800 p-0.5 border border-slate-700">
+        <button id="btnModeMobile" class="dev-btn active-mode" title="Simulate 390px Mobile Smartphone View">
+          <i data-lucide="smartphone" class="w-3.5 h-3.5"></i> Mobile View
+        </button>
+        <button id="btnModeDesktop" class="dev-btn" title="Full Responsive Desktop View">
+          <i data-lucide="monitor" class="w-3.5 h-3.5"></i> Responsive View
+        </button>
+      </div>
+
+      <!-- Quick Role Switcher -->
+      <div class="flex items-center gap-1.5 text-xs text-slate-300">
+        <span class="text-slate-400 hidden sm:inline">Role:</span>
+        <button id="switchSeekerBtn" class="dev-btn" title="Switch to Job Seeker (Rahul Sharma)">
+          <i data-lucide="user" class="w-3.5 h-3.5 text-teal-400"></i> Seeker
+        </button>
+        <button id="switchEmployerBtn" class="dev-btn" title="Switch to Employer (Priya Reddy - ABC Learning)">
+          <i data-lucide="briefcase" class="w-3.5 h-3.5 text-indigo-400"></i> Employer
+        </button>
+        <button id="switchAdminBtn" class="dev-btn" title="Switch to Trust & Safety Admin Panel">
+          <i data-lucide="shield-check" class="w-3.5 h-3.5 text-amber-400"></i> Admin
+        </button>
+        <button id="resetDemoBtn" class="dev-btn text-rose-300 hover:text-rose-100" title="Reset all data to default demo state">
+          <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Reset
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Viewport Container -->
+  <main id="appViewport" class="app-viewport-container mode-mobile">
+    <div class="app-frame">
+      
+      <!-- Phone Mockup Notch (Only visible in Mobile Frame mode) -->
+      <div class="phone-notch">
+        <span id="statusBarTime">09:41</span>
+        <div class="w-20 h-4 bg-slate-900 rounded-full flex items-center justify-center">
+          <div class="w-2 h-2 rounded-full bg-slate-700 mr-2"></div>
+          <div class="w-2.5 h-2.5 rounded-full bg-teal-500/40"></div>
+        </div>
+        <div class="flex items-center gap-1.5 text-slate-400">
+          <i data-lucide="signal" class="w-3 h-3"></i>
+          <i data-lucide="wifi" class="w-3 h-3"></i>
+          <i data-lucide="battery" class="w-3.5 h-3.5 text-slate-300"></i>
+        </div>
+      </div>
+
+      <!-- App Header Bar -->
+      <div id="topAppBar" class="bg-white/95 backdrop-blur-md px-4 py-3 border-b border-slate-100 flex items-center justify-between sticky top-0 z-30 flex-shrink-0 shadow-sm">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-teal-600 to-teal-500 text-white flex items-center justify-center font-extrabold text-lg shadow-md shadow-teal-600/20">
+            HN
+          </div>
+          <div>
+            <h1 class="text-base font-bold text-slate-900 leading-tight tracking-tight flex items-center gap-1">
+              HireNear
+              <span id="roleIndicatorBadge" class="text-[10px] font-semibold px-1.5 py-0.2 rounded bg-teal-50 text-teal-700 border border-teal-200">
+                Seeker
+              </span>
+            </h1>
+            <p class="text-[11px] text-slate-500 flex items-center gap-1">
+              <i data-lucide="map-pin" class="w-3 h-3 text-teal-600"></i>
+              <span id="headerLocationLabel" class="truncate max-w-[170px]">Kukatpally, Hyderabad</span>
+              <button id="btnChangeLocation" class="text-teal-600 font-semibold underline text-[10px] ml-0.5">change</button>
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+          <!-- Trust & Safety Quick Button -->
+          <button id="btnSafetyInfo" class="p-2 rounded-full text-slate-600 hover:bg-slate-100 relative" title="Safety Guidelines & Scam Warnings">
+            <i data-lucide="shield-alert" class="w-5 h-5 text-amber-600"></i>
+          </button>
+          
+          <!-- Notifications Bell -->
+          <button id="btnNotifications" class="p-2 rounded-full text-slate-600 hover:bg-slate-100 relative" title="Notifications">
+            <i data-lucide="bell" class="w-5 h-5"></i>
+            <span id="notifBadgeCount" class="absolute top-1 right-1 w-4 h-4 bg-rose-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">2</span>
+          </button>
+
+          <!-- Current User Avatar / Auth Switch -->
+          <button id="btnUserMenu" class="w-8 h-8 rounded-full border-2 border-teal-500 overflow-hidden shadow-sm" title="Profile / Account">
+            <img id="headerUserAvatar" src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=100&auto=format&fit=crop&q=80" alt="Avatar" class="w-full h-full object-cover">
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Dynamic Scrollable Screen Container -->
+      <div id="screenContainer" class="app-screen-scroll">
+        <!-- Content will be injected dynamically by app.js based on active tab & role -->
+      </div>
+
+      <!-- Bottom Navigation Bar (Dynamic tabs based on Seeker / Employer role) -->
+      <nav id="bottomNavBar" class="bottom-nav">
+        <!-- Tabs injected by app.js -->
+      </nav>
+
+    </div>
+  </main>
+
+  <!-- Modals & Bottom Sheets Container -->
+  
+  <!-- 1. Job Details Modal / Drawer -->
+  <div id="jobDetailsModal" class="modal-overlay">
+    <div class="bottom-sheet">
+      <div class="sheet-handle"></div>
+      <div id="jobDetailsContent" class="p-5 overflow-y-auto">
+        <!-- Injected dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Apply for Job Modal -->
+  <div id="applyModal" class="modal-overlay">
+    <div class="bottom-sheet">
+      <div class="sheet-handle"></div>
+      <div class="p-5">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+          <div>
+            <h3 class="font-bold text-lg text-slate-900" id="applyModalTitle">Apply for Job</h3>
+            <p class="text-xs text-slate-500" id="applyModalCompany">Company Name</p>
+          </div>
+          <button class="modal-close-btn p-1 text-slate-400 hover:text-slate-600">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+
+        <form id="applyJobForm" class="mt-4 space-y-4">
+          <input type="hidden" id="applyJobId">
+          
+          <div class="bg-teal-50 border border-teal-100 rounded-xl p-3 flex items-center gap-3">
+            <img id="applySeekerPhoto" src="" alt="Seeker" class="w-10 h-10 rounded-full object-cover border border-teal-200">
+            <div>
+              <p class="text-xs font-bold text-teal-950" id="applySeekerName">Rahul Sharma</p>
+              <p class="text-[11px] text-teal-700" id="applySeekerExp">1+ year tutoring • Kukatpally</p>
+            </div>
+            <span class="ml-auto text-[10px] font-bold bg-white text-teal-800 px-2 py-0.5 rounded-full border border-teal-200">Profile Ready</span>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Message to Employer</label>
+            <textarea id="applyMessage" rows="3" class="w-full text-xs p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:outline-none" placeholder="Briefly describe why you are a great fit and when you can start..."></textarea>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Availability to Start</label>
+            <select id="applyAvailability" class="w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:outline-none bg-white">
+              <option value="Immediately (from today/tomorrow)">Immediately (from today / tomorrow)</option>
+              <option value="Within 3 days">Within 3 days</option>
+              <option value="From next Monday">From next Monday</option>
+              <option value="Weekend only">Weekend only</option>
+              <option value="Flexible / Negotiable">Flexible / Negotiable</option>
+            </select>
+          </div>
+
+          <div class="flex items-start gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-[11px] text-slate-600">
+            <input type="checkbox" id="privacyConsent" checked class="mt-0.5 rounded text-teal-600 focus:ring-teal-500">
+            <label for="privacyConsent">
+              Share my verified profile and contact details securely with this employer.
+            </label>
+          </div>
+
+          <div class="pt-2">
+            <button type="submit" class="w-full py-3 bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm rounded-xl shadow-md shadow-teal-600/25 transition active:scale-[0.98]">
+              Submit Application
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Post a Job Modal (Employer) -->
+  <div id="postJobModal" class="modal-overlay">
+    <div class="bottom-sheet">
+      <div class="sheet-handle"></div>
+      <div class="p-5 max-h-[80vh] overflow-y-auto">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+          <div>
+            <h3 class="font-bold text-lg text-slate-900">Post a Local Job</h3>
+            <p class="text-xs text-slate-500">Find reliable local workers near you</p>
+          </div>
+          <button class="modal-close-btn p-1 text-slate-400 hover:text-slate-600">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+
+        <form id="postJobForm" class="mt-4 space-y-3.5">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Job Title *</label>
+            <input type="text" id="jobPostTitle" required placeholder="e.g. Home Tutor, Housekeeper, Sales Assistant" class="w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:outline-none">
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Category *</label>
+              <select id="jobPostCategory" required class="w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:outline-none bg-white">
+                <option value="education">Education & Tuition</option>
+                <option value="domestic">Domestic & Home Care</option>
+                <option value="delivery">Delivery & Logistics</option>
+                <option value="sales">Sales & Retail</option>
+                <option value="office">Office & Billing</option>
+                <option value="technical">Technical & Electrician</option>
+                <option value="hospitality">Hospitality & Cafe</option>
+                <option value="events">Events & Catering</option>
+                <option value="driving">Drivers & Transport</option>
+                <option value="student">Student Friendly</option>
+                <option value="other">Other Local Work</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Job Type *</label>
+              <select id="jobPostType" required class="w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:outline-none bg-white">
+                <option value="Part-Time">Part-Time</option>
+                <option value="Full-Time">Full-Time</option>
+                <option value="Temporary">Temporary / Daily</option>
+                <option value="Weekend">Weekend</option>
+                <option value="Student-friendly">Student Friendly</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Location (Locality / Area) *</label>
+            <select id="jobPostLocation" required class="w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:outline-none bg-white">
+              <option value="Kukatpally, Hyderabad">Kukatpally, Hyderabad</option>
+              <option value="Gachibowli, Hyderabad">Gachibowli, Hyderabad</option>
+              <option value="Madhapur, Hyderabad">Madhapur, Hyderabad</option>
+              <option value="Miyapur, Hyderabad">Miyapur, Hyderabad</option>
+              <option value="Secunderabad">Secunderabad</option>
+              <option value="Begumpet, Hyderabad">Begumpet, Hyderabad</option>
+              <option value="Uppal, Hyderabad">Uppal, Hyderabad</option>
+              <option value="Dilsukhnagar, Hyderabad">Dilsukhnagar, Hyderabad</option>
+              <option value="Kondapur, Hyderabad">Kondapur, Hyderabad</option>
+              <option value="Banjara Hills, Hyderabad">Banjara Hills, Hyderabad</option>
+            </select>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Salary Amount (₹) *</label>
+              <input type="number" id="jobPostSalary" required placeholder="e.g. 12000" class="w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:outline-none">
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Salary Type *</label>
+              <select id="jobPostSalaryType" class="w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:outline-none bg-white">
+                <option value="per month">per month</option>
+                <option value="per day">per day</option>
+                <option value="per hour">per hour</option>
+                <option value="fixed">fixed task rate</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Working Hours *</label>
+              <input type="text" id="jobPostHours" required placeholder="e.g. 5:00 PM – 7:00 PM" class="w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Number of Openings</label>
+              <input type="number" id="jobPostOpenings" value="1" min="1" class="w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:outline-none">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Required Skills (Comma separated) *</label>
+            <input type="text" id="jobPostSkills" required placeholder="e.g. Mathematics, Teaching, English" class="w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:outline-none">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Job Description & Responsibilities *</label>
+            <textarea id="jobPostDesc" rows="3" required placeholder="Describe what the worker needs to do, expected conduct, and exact work location..." class="w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:outline-none"></textarea>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Experience Required</label>
+            <input type="text" id="jobPostExperience" placeholder="e.g. Fresher / College students welcome" value="Freshers welcome" class="w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:outline-none">
+          </div>
+
+          <div class="pt-2">
+            <button type="submit" class="w-full py-3 bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm rounded-xl shadow-md shadow-teal-600/25 transition active:scale-[0.98]">
+              Post Job Now
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Candidate Details Modal (For Employers reviewing Applicants) -->
+  <div id="candidateModal" class="modal-overlay">
+    <div class="bottom-sheet">
+      <div class="sheet-handle"></div>
+      <div id="candidateDetailsContent" class="p-5 overflow-y-auto">
+        <!-- Injected dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Trust & Safety / Report Modal -->
+  <div id="reportModal" class="modal-overlay">
+    <div class="bottom-sheet">
+      <div class="sheet-handle"></div>
+      <div class="p-5">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+          <div class="flex items-center gap-2">
+            <div class="w-7 h-7 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center font-bold">
+              <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+            </div>
+            <div>
+              <h3 class="font-bold text-base text-slate-900">Report to Trust & Safety</h3>
+              <p class="text-[11px] text-slate-500">HireNear protects our community against scams</p>
+            </div>
+          </div>
+          <button class="modal-close-btn p-1 text-slate-400 hover:text-slate-600">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+
+        <form id="reportForm" class="mt-4 space-y-3.5">
+          <input type="hidden" id="reportTargetType" value="job">
+          <input type="hidden" id="reportTargetId" value="">
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Select Reason *</label>
+            <select id="reportReason" required class="w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none bg-white">
+              <option value="Advance payment scam / demand">Demanding advance payment or registration fee (Scam)</option>
+              <option value="Misleading salary / job details">Misleading salary, hours, or job details</option>
+              <option value="Inappropriate behavior">Inappropriate or abusive behavior</option>
+              <option value="Fake profile">Fake profile or suspicious identity</option>
+              <option value="Other">Other safety concern</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Explain what happened *</label>
+            <textarea id="reportDetails" rows="3" required placeholder="Provide details (e.g. asked for ₹500 registration via UPI, phone harassment, etc.)" class="w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none"></textarea>
+          </div>
+
+          <div class="bg-amber-50 border border-amber-200 p-2.5 rounded-xl text-[11px] text-amber-800 flex items-start gap-2">
+            <i data-lucide="shield" class="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0"></i>
+            <span>Our Trust & Safety moderators review flagged listings within 30 minutes and suspend fraudulent accounts permanently.</span>
+          </div>
+
+          <div class="pt-2">
+            <button type="submit" class="w-full py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow transition">
+              Submit Safety Report
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. Community Safety Guidelines Modal -->
+  <div id="safetyModal" class="modal-overlay">
+    <div class="bottom-sheet">
+      <div class="sheet-handle"></div>
+      <div class="p-5 max-h-[80vh] overflow-y-auto">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center font-bold">
+              <i data-lucide="shield-check" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h3 class="font-bold text-base text-slate-900">Trust & Safety Guidelines</h3>
+              <p class="text-[11px] text-slate-500">HireNear Safe Hiring Standards</p>
+            </div>
+          </div>
+          <button class="modal-close-btn p-1 text-slate-400 hover:text-slate-600">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+
+        <div class="mt-4 space-y-3.5">
+          <!-- Critical Scam Warning -->
+          <div class="bg-rose-50 border-2 border-rose-200 rounded-2xl p-3.5">
+            <div class="flex items-center gap-2 text-rose-800 font-bold text-xs mb-1">
+              <i data-lucide="alert-octagon" class="w-4 h-4 text-rose-600"></i>
+              WARNING: NEVER PAY ADVANCE MONEY
+            </div>
+            <p class="text-[11px] text-rose-700 leading-relaxed">
+              Legitimate employers will <strong>never</strong> ask you to pay money for registration, uniform, test materials, or interview tokens. If anyone demands money via Google Pay, PhonePe, or UPI, do not pay. Report them immediately.
+            </p>
+          </div>
+
+          <div class="space-y-3" id="communityGuidelinesList">
+            <!-- Guidelines injected dynamically -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. Location Selector Modal -->
+  <div id="locationModal" class="modal-overlay">
+    <div class="bottom-sheet">
+      <div class="sheet-handle"></div>
+      <div class="p-5">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+          <h3 class="font-bold text-base text-slate-900">Select Your Location</h3>
+          <button class="modal-close-btn p-1 text-slate-400 hover:text-slate-600">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+        <p class="text-xs text-slate-500 mt-1 mb-3">Jobs and AI recommendations will prioritize opportunities near your area.</p>
+
+        <div class="space-y-1.5" id="localityPickerList">
+          <!-- Localities list -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. Edit Profile Modal -->
+  <div id="editProfileModal" class="modal-overlay">
+    <div class="bottom-sheet">
+      <div class="sheet-handle"></div>
+      <div class="p-5 max-h-[80vh] overflow-y-auto">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+          <h3 class="font-bold text-base text-slate-900">Edit Profile</h3>
+          <button class="modal-close-btn p-1 text-slate-400 hover:text-slate-600">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+
+        <form id="editProfileForm" class="mt-4 space-y-3.5">
+          <!-- Form fields injected by app.js depending on Seeker vs Employer -->
+          <div id="editProfileFields" class="space-y-3"></div>
+          <div class="pt-2">
+            <button type="submit" class="w-full py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs rounded-xl shadow transition">
+              Save Changes
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9. Welcome / Auth Modal -->
+  <div id="authModal" class="modal-overlay">
+    <div class="bottom-sheet">
+      <div class="sheet-handle"></div>
+      <div class="p-5">
+        <div class="text-center pb-4">
+          <div class="w-12 h-12 rounded-2xl bg-teal-600 text-white font-black text-2xl flex items-center justify-center mx-auto mb-2 shadow-lg shadow-teal-600/30">
+            HN
+          </div>
+          <h2 class="text-xl font-extrabold text-slate-900">HireNear</h2>
+          <p class="text-xs font-semibold text-teal-700">Find Jobs. Find People. Hire Near.</p>
+          <p class="text-[11px] text-slate-500 mt-1">Your local marketplace for nearby jobs and reliable workers</p>
+        </div>
+
+        <!-- Role Selector Tab -->
+        <div class="flex rounded-xl bg-slate-100 p-1 mb-4 text-xs font-bold text-slate-600">
+          <button id="authTabSeeker" type="button" class="flex-1 py-2 rounded-lg bg-white text-teal-800 shadow-sm transition">
+            Job Seeker
+          </button>
+          <button id="authTabEmployer" type="button" class="flex-1 py-2 rounded-lg text-slate-500 transition">
+            Employer
+          </button>
+        </div>
+
+        <div class="space-y-2 mb-4">
+          <p class="text-xs font-bold text-slate-700">Quick Demo Logins (Instant Access):</p>
+          <div class="grid grid-cols-2 gap-2">
+            <button id="demoLoginRahul" type="button" class="p-2.5 border border-teal-200 bg-teal-50/50 hover:bg-teal-100/60 rounded-xl text-left transition">
+              <p class="text-xs font-bold text-teal-900">Rahul Sharma</p>
+              <p class="text-[10px] text-teal-700">Job Seeker (Student/Tutor)</p>
+            </button>
+            <button id="demoLoginPriya" type="button" class="p-2.5 border border-indigo-200 bg-indigo-50/50 hover:bg-indigo-100/60 rounded-xl text-left transition">
+              <p class="text-xs font-bold text-indigo-900">Priya Reddy</p>
+              <p class="text-[10px] text-indigo-700">Employer (ABC Learning)</p>
+            </button>
+          </div>
+        </div>
+
+        <!-- Registration / Sign In Form -->
+        <form id="authForm" class="space-y-3">
+          <input type="hidden" id="authRole" value="seeker">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Full Name</label>
+            <input type="text" id="authName" placeholder="e.g. Suresh Kumar" class="w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Mobile Number (Indian +91)</label>
+            <input type="tel" id="authPhone" placeholder="+91 98765 00000" class="w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Location</label>
+            <input type="text" id="authLocation" placeholder="e.g. Kukatpally, Hyderabad" class="w-full text-xs p-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:outline-none">
+          </div>
+
+          <button type="submit" class="w-full py-3 bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs rounded-xl shadow transition">
+            Continue to HireNear
+          </button>
+        </form>
+
+        <div class="mt-3 text-center">
+          <button id="authCloseBtn" class="text-xs text-slate-400 hover:text-slate-600 underline">Continue as Guest</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notifications Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Main JavaScript App Entrypoint (ES Module) -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
